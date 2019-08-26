@@ -1,0 +1,4 @@
+*~
+*.bak
+*.wasm
+wasm_exec.js

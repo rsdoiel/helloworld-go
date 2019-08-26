@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Demo of helloworld.go as WASM</title>
+        <meta charset="utf-8">
+    </head>
+
+    <body>
+        <h1>Demo of helloworld.go as WASM</h1>
+        <!--
+            wasm_exec.js is provided by Golang Go's compiler or
+            TinyGo compiler.
+            see 
+                + go/misc/wasm/wasm_exec.html and go/misc/wasm_exec.js
+                + tinygo/targets/wasm_exec.js
+        -->
+        <!--
+	        Add the following polyfill for Microsoft Edge 17/18 support:
+	        <script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+	        (see https://caniuse.com/#feat=textencoder)
+	    -->
+	    <script src="wasm_exec.js"></script>
+        <script>
+        (function (document, window) {
+            "use string";
+            const WASM_URL = 'helloworld.wasm';
+            var helloworld;
+
+            function updateResults() {
+                console.log("DEBUG (0) helloworld", helloworld);
+                if (helloworld.exports !== undefined) {
+                    return helloworld.exports.update();
+                }
+                return "Not set het";
+            }
+
+            console.log("DEBUG (5) WebAssembly", WebAssembly !== undefined)
+            console.log("DEBUG (6) WebAssembly.instantiate", WebAssembly.instantiate !== undefined)
+
+            function init() {
+                const go = new Go(); // Defined in wasm_exec.js
+                var elem = document.querySelector("h1");
+                elem.oninput = updateResults();
+
+                fetch(WASM_URL).then(
+                    resp => resp.arrayBuffer()
+                ).then(
+                    bytes => 
+                        WebAssembly.instantiate(bytes, 
+                            go.importObject).then(function (obj) {
+                                console.log("DEBUG (2) elem", elem);
+		                        helloworld = obj.instance;
+		                        go.run(helloworld);
+                                helloworld.exports.update();
+	                        }));
+            }
+            init();
+            console.log("DEBUG (1) WASM_URL", WASM_URL);
+        }(document, window));
+        </script>
+    </body>
+</html>

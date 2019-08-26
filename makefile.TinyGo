@@ -1,0 +1,18 @@
+#
+# Example TinyGo makefile for generating a helloworld.wasm from
+# helloworld.go.
+#
+
+build: helloworld.wasm wasm_exec.js
+
+helloworld.wasm: helloworld.go
+	tinygo build -o helloworld.wasm -target wasm helloworld.go
+
+wasm_exec.js: 
+	if [ ! -f "wasm_exec.js" ]; then cp "$(GOPATH)/src/github.com/tinygo-org/tinygo/targets/wasm_exec.js" ./;fi
+
+clean:
+	if [ -f wasm_exec.js ]; then rm wasm_exec.js; fi
+	if [ -f helloworld.wasm ]; then rm helloworld.wasm; fi
+
+.FORCE:
